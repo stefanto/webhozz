@@ -1,0 +1,54 @@
+<hr/>
+<p><a href="/">Back</a>
+
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="js/jquery.fancy-scroll.js"></script>
+<script type="text/javascript">
+	$(window).fancy_scroll({
+	  animation: "glow"
+	});
+</script>
+<script src="js/ripple.js"></script>
+
+<form id="myForm" action="http://192.168.0.15/android/android_insertsql.php" method="post">
+    <p>Name: <input type="text" name="name" /></p>
+    <p>Address: <input type="text" name="address" /></p>
+	<p>Mobile: <input type="text" name="mobile" /></p>
+    <p><button id="sub">Save</button>
+</form>
+<span id="result"></span>
+<hr/>
+
+<div id="data"></div>
+
+<script>
+	//READ SQL
+	$.ajax({
+		type: "POST",
+		url: "http://192.168.0.15/android/android_readsql.php",
+		data:{keyword:''},
+		dataType:'json',
+		complete: function(data) {
+			$('#data').html(data.responseText);
+		}
+	});
+	
+	//WRITE TO SQL
+	$('#sub').click(function() {
+        $.post($("#myForm").attr("action"),
+                $("#myForm :input").serializeArray(),
+                function(info){ $("#result").html(info);
+    });
+    clearInput();
+    });
+
+    $("#myForm").submit(function() {
+        return false;
+    });
+
+    function clearInput() {
+        $("#myForm :input").each(function() {
+            $(this).val('');
+        });
+    }
+</script>

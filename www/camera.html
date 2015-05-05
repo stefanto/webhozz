@@ -1,0 +1,60 @@
+<hr/>
+<p><a href="/">Back</a>
+
+<script type="text/javascript" src="cordova.js"></script>
+<script src="js/ripple.js"></script>
+
+<h1>Camera Function</h1>
+<p><button onclick="capturePhoto();">Capture Photo</button></p>
+<p><button onclick="capturePhotoEdit();">Capture Editable Photo</button></p>
+<p><button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button></p>
+<p><button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button></p>
+<p><img style="display:none; width:60px; height:60px;" id="smallImage" src="" /></p>
+<p><img style="display:none;" id="largeImage" src="" /></p>
+
+<script>
+//CAMERA FUNCTION
+document.addEventListener("deviceready",onDeviceReady,false);
+
+function onDeviceReady() {
+	navigator.splashscreen.show();
+}
+
+var pictureSource;
+var destionationType;
+
+document.addEventListener("deviceready",onDeviceReady,false);
+
+function onDeviceReady() {
+	pictureSource=navigator.camera.PictureSourceType;
+	destinationType=navigator.camera.DestinationType;
+}
+
+function onPhotoDataSuccess(imageData) {
+	var smallImage = document.getElementById('smallImage');
+	smallImage.style.display='block';
+	smallImage.src="data:image/jpeg;base64,"+imageData;
+}
+
+function onPhotoURISuccess(imageURI) {
+	var largeImage = document.getElementById('largeImage');
+	largeImage.style.display = 'block';
+	largeImage.src = imageURI;
+}
+
+function capturePhoto() {
+	navigator.camera.getPicture(onPhotoDataSuccess, onFail, {quality:50, destinationType:destinationType.DATA_URL});
+}
+
+function capturePhotoEdit(){
+navigator.camera.getPicture(onPhotoDataSuccess, onFail, {quality:20, allowEdit:true, destinationType:destinationType.DATA_URL});
+}
+
+function getPhoto(source) {
+	navigator.camera.getPicture(onPhotoURISuccess, onFail, {quality:50, destinationType:destinationType.FILE_URI, sourceType:source});
+}
+
+function onFail(message) {
+	alert('Failed because:' + message);
+}
+</script>

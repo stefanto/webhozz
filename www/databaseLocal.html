@@ -1,0 +1,187 @@
+<hr/>
+<p><a href="/">Back</a>
+
+<script src="js/jquery-1.11.2.min.js"></script>
+
+<h1>DATABASE LOCAL</h1>
+<script>
+	var db = window.openDatabase("profil","1.0","profil", 100000);
+	function onSuccess() {
+		location.reload();
+	}
+	function onError(tx, err) {
+		alert("Error:" + err);
+	}
+</script>
+
+
+<!--<h3>Create Database</h3>
+<input type="button" value="Create Database Table" onclick="createDB()" />
+<script>
+var db = window.openDatabase("profil","1.0","profil", 100000);
+
+function createDB() {
+	db.transaction(createTable, onError, onSuccess);
+}
+function createTable(tx) {
+	tx.executeSql('CREATE TABLE IF NOT EXISTS user' + '(id INTEGER PRIMARY KEY, nama VARCHAR, alamat VARCHAR)');
+	tx.executeSql('INSERT INTO user VALUES ("Test1", "Jakarta")');
+}
+</script>-->
+
+<h3>Insert to Database</h3>
+<form>
+<p>Nama: <input type="text" id="nama" /></p>
+<p>Kota: <input type="text" id="kota" /></p>
+<p><input type="button" onclick="doInsert()" value="Submit"></p>
+</form>
+<script>
+function doInsert() {
+	var nama = document.getElementById("nama").value;
+	var kota = document.getElementById("kota").value;
+	
+	if (nama == "") {alert("Nama harus diisi");}
+	else if (kota == "") {alert("Kota harus diisi");}
+	else {db.transaction(insertData, onError, onSuccess);}
+}
+
+function insertData(tx) {
+	//tx.executeSql('DROP TABLE IF EXISTS user');
+	tx.executeSql('CREATE TABLE IF NOT EXISTS user' + '(id INTEGER PRIMARY KEY, nama VARCHAR, kota VARCHAR)');
+	var nama = document.getElementById("nama").value;
+	var kota = document.getElementById("kota").value;
+	tx.executeSql('INSERT INTO user (nama, kota) VALUES ("' + nama + '", "' + kota + '")');	
+}
+</script>
+
+
+<div id="viewDiv">
+<h3>View Data</h3>
+<div id="data"></div>
+</div>
+
+<script>
+db.transaction(selectTable, onError, onSuccessSelectTable);
+
+function selectTable(tx) {
+	tx.executeSql('CREATE TABLE IF NOT EXISTS user' + '(id INTEGER PRIMARY KEY, nama VARCHAR, kota VARCHAR)');
+}
+
+function onSuccessSelectTable() {
+	db.transaction(queryData,onError);
+}
+
+function queryData(tx) {
+	tx.executeSql('SELECT * FROM user;',[],querySuccess, onError);
+}
+
+function querySuccess(tx, result) {
+	var len = result.rows.length;
+	var data = document.getElementById("data");
+	data.innerHTML = "";
+	
+	if (len > 0) {
+		for (var i=0; i<len; i++) {
+			data.innerHTML += "Nama:" + result.rows.item(i).nama + "<br/>Kota: " + result.rows.item(i).kota + "<br/><a href='javascript:void(0)' onclick='updateRow(" + result.rows.item(i).id + ")'>edit</a> | <a href='javascript:void(0)' onclick='deleteRow(" + result.rows.item(i).id + ")'>delete</a><br/><br/>";
+		}
+	} else {
+		data.innerHTML="Tidak ada data";
+	}
+}
+
+function deleteRow(id) {
+var r = confirm("Are you sure?");
+if (r == true) {
+	db.transaction(function(tx) {
+		tx.executeSql('DELETE FROM user WHERE id = '+ id, [], onSuccess, onError);
+	},onError);
+}
+}
+</script>
+
+<div id="updateDiv" style="display:none">
+<h3>Update Data</h3>
+<div id="update">Tidak ada data</div>
+</div>
+
+<script>
+function updateRow(id) {
+	window.location.href = addParameter(window.location.href, 'id', id);
+}
+
+function addParameter(url, param, value) {
+    var val = new RegExp('(\\?|\\&)' + param + '=.*?(?=(&|$))'),
+        parts = url.toString().split('#'),
+        url = parts[0],
+        hash = parts[1]
+        qstring = /\?.+$/,
+        newURL = url;
+
+    if (val.test(url))
+    {
+        newURL = url.replace(val, '$1' + param + '=' + value);
+    }
+    else if (qstring.test(url))
+    {
+        newURL = url + '&' + param + '=' + value;
+    }
+    else
+    {
+        newURL = url + '?' + param + '=' + value;
+    }
+
+    if (hash)
+    {
+        newURL += '#' + hash;
+    }
+
+    return newURL;
+}
+
+var id = getURLVars()["id"];
+function getURLVars() {
+	var vars = {};
+	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value){
+	vars[key] = value;
+	});
+	return vars;
+}
+
+if(id != undefined) {
+	db.transaction(function(tx) {
+		tx.executeSql('SELECT * FROM user WHERE id='+id,[],querySuccessUpdateTable,onError)
+	},onError);
+}
+
+function querySuccessUpdateTable(tx,result) {
+	var len = result.rows.length;
+	var data = document.getElementById("update");
+	if (len > 0) {
+		for (var i=0; i<len; i++) {
+			data.innerHTML = "ID: <label id='upd_id'>" +
+			result.rows.item(i).id + "</label><br/>Nama: <input type='text' id='upd_nama' value='" +
+			result.rows.item(i).nama + "'><br/>Kota: <input type='text' id='upd_kota' value='" +
+			result.rows.item(i).kota + "'><br/><input type='submit' value='Update' onclick='update()'><hr/>";
+		}
+		
+		$('#viewDiv').hide();
+		$('#updateDiv').show();
+	} else {
+		data.innerHTML = "Tidak ada data";
+	}
+}
+
+function update() {
+	var id= document.getElementById("upd_id").innerHTML;
+	var nama = document.getElementById("upd_nama").value;
+	var kota = document.getElementById("upd_kota").value;
+	
+	db.transaction(function(tx) {
+	tx.executeSql('UPDATE user SET nama="'+nama+'", kota="'+kota+'" WHERE id='+id,[],onSuccessUpdate,onError)
+	},onError);
+}
+
+function onSuccessUpdate() {
+	window.location.href = window.location.pathname;
+}
+</script>

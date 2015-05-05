@@ -1,0 +1,36 @@
+<hr/>
+<p><a href="/">Back</a>
+
+<script type="text/javascript" src="cordova.js"></script>
+
+<h1>Network Connection</h1>
+<p id="connectionType">A dialog box will report the network state.</p>
+
+<script>
+    // Wait for device API libraries to load
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // device APIs are available
+    function onDeviceReady() {
+        checkConnection();
+    }
+
+        function checkConnection() {
+            var networkState = navigator.connection.type;
+
+            var states = {};
+            states[Connection.UNKNOWN]  = 'Unknown connection';
+            states[Connection.ETHERNET] = 'Ethernet connection';
+            states[Connection.WIFI]     = 'WiFi connection';
+            states[Connection.CELL_2G]  = 'Cell 2G connection';
+            states[Connection.CELL_3G]  = 'Cell 3G connection';
+            states[Connection.CELL_4G]  = 'Cell 4G connection';
+            states[Connection.CELL]     = 'Cell generic connection';
+            states[Connection.NONE]     = 'No network connection';
+
+            //alert('Connection type: ' + states[networkState]);
+			var element = document.getElementById('connectionType');
+			element.innerHTML = 'Connection type: ' + states[networkState];
+        }
+
+</script>

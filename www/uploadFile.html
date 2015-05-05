@@ -1,0 +1,50 @@
+<hr/>
+<p><a href="/">Back</a>
+
+<script src="js/jquery-1.11.2.min.js"></script>
+
+<h1>Upload File</h1>
+
+<form name="multiform" id="multiform" action="http://192.168.0.15/android/android_fileupload.php" method="POST" enctype="multipart/form-data">
+    <p>Name: <input type="text" name="name" id="name"></p>
+    <p>Address: <input type="text" name="address" id="address"></p>
+    <p>Thumbnail: <input type="file" name="file" id="file"></p>
+</form>
+<input type="button" id="multi-post" value="Submit">
+<div id="multi-msg"></div>
+
+<script>
+    $("#multiform").submit(function(e) {
+        var formObj = $(this);
+        var formURL = formObj.attr("action");
+
+        if(window.FormData !== undefined)
+        {
+            var formData = new FormData(this);
+            $.ajax({
+                url:formURL,
+                type:'POST',
+                data:formData,
+                mimeType:"multipart/form-data",
+                contentType:false,
+                cache:false,
+                processData:false,
+                success:function(data, textStatus, jqXHR)
+                {
+                    $("#multi-msg").html('<pre><code>'+data+'</code></pre>');
+                },
+                error: function(jqXHR, textStatus, errorThrown)
+                {
+                    $("#multi-msg").html('<pre><code class="prettyprint">AJAX Request Failed<br/> textStatus='+ textStatus +', errorThrown='+ errorThrown +'</code></pre>');
+                }
+            });
+            e.preventDefault();
+            e.unbind();
+        }
+    })
+
+    $("#multi-post").click(function() {
+        //sending form from here
+        $("#multiform").submit();
+    })
+</script>
